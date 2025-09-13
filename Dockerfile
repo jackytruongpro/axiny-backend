@@ -3,7 +3,7 @@ FROM rocker/r-ver:4.3.1
 # Définir le répertoire de travail
 WORKDIR /srv/shiny-server
 
-# Installer les dépendances système et Chromium (non-Snap)
+# 1. Installer les dépendances système (couche rarement modifiée)
 RUN apt-get update && \
     apt-get install -y \
       libcurl4-openssl-dev \
@@ -14,15 +14,14 @@ RUN apt-get update && \
       chromium-browser \
     && rm -rf /var/lib/apt/lists/*
 
-# Installer les packages R nécessaires
-RUN R -e "install.packages(c('shiny','httpuv'), repos='https://cloud.r-project.org')"
+# 2. Installer les packages R nécessaires (couche rarement modifiée)
+RUN R -e "install.packages(c('shiny','httpuv','ggplot2','rvest'), repos='https://cloud.r-project.org')"
 
-# Copier l’application Shiny et le script de snapshot
+# 3. Copier l’application Shiny et le script de snapshot (couche fréquemment modifiée)
 COPY user_app /srv/shiny-server/user_app
-COPY loader.R /srv/shiny-server/loader.R
-COPY snapshot.R /srv/shiny-server/snapshot.R
+COPY loader.R snapshot.R /srv/shiny-server/
 
-# Créer le dossier pour les snapshots
+# 4. Créer le dossier pour les snapshots
 RUN mkdir -p /srv/shiny-server/snapshots
 
 # Exposer le port Shiny

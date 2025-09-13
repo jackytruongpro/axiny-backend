@@ -1,27 +1,42 @@
 # user_app/app.R
 library(shiny)
+library(ggplot2)
 
 ui <- fluidPage(
-  titlePanel("Old Faithful Geyser Data"),
+  titlePanel("Analyse du jeu de données mtcars"),
   sidebarLayout(
     sidebarPanel(
-      sliderInput("bins", "Number of bins:",
-                  min = 1, max = 50, value = 30),
-      selectInput("color", "Bar color:",
-                  choices = c("darkgray", "steelblue", "forestgreen"),
-                  selected = "steelblue")
+      selectInput("xvar", "Variable X :", 
+                  choices = names(mtcars)[sapply(mtcars, is.numeric)], 
+                  selected = "wt"),
+      selectInput("yvar", "Variable Y :", 
+                  choices = names(mtcars)[sapply(mtcars, is.numeric)], 
+                  selected = "mpg"),
+      sliderInput("points", "Nombre de points :", 
+                  min = 10, max = nrow(mtcars), value = 20)
     ),
     mainPanel(
-      plotOutput("distPlot")
+      plotOutput("scatterPlot"),
+      verbatimTextOutput("summary")
     )
   )
 )
 
 server <- function(input, output, session) {
-  output$distPlot <- renderPlot({
-    x    <- faithful$eruptions
-    bins <- seq(min(x), max(x), length.out = input$bins + 1)
-    hist(x, breaks = bins, col = input$color,
-         xlab = "Duration (minutes)", main = "Histogram of eruption durations")
+  sampled <- reactive({
+    mtcars[sample(nrow(mtcars), input$points), ]
+  })
+  
+  output$scatterPlot <- renderPlot({
+    ggplot(sampled(), aes_string(x = input$xvar, y = input$yvar)) +
+      geom_point(color = "steelblue", size = 3) +
+      theme_minimal() +
+      labs(title = paste("Nuage de points de", input$yvar, "vs", input$xvar))
+  })
+  
+  output$summary <- renderPrint({
+    summary(sampled()[, c(input$xvar, input$yvar)])
   })
 }
+
+shinyApp(ui = ui, server = server)
