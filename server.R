@@ -25,6 +25,5 @@ function(req, res){
   res
 } -> snapshot_endpoint
 
-# Plumb & run
 pr <- plumber::plumb(file = "server.R")
 pr$run(host = "0.0.0.0", port = as.integer(Sys.getenv("PORT", "8080")))
