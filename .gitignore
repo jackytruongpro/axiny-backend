@@ -1,0 +1,18 @@
+# macOS
+.DS_Store
+
+# Docker build cache
+.docker-cache/
+
+# Node modules or build artifacts (if any)
+node_modules/
+
+# R project files
+.Rhistory
+.RData
+.Rproj.user
+
+# snapshots output
+snapshots/all_snapshots_merged.pdf
+snapshots/*.png
+snapshots/*.pdf
