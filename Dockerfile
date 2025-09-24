@@ -4,7 +4,7 @@ FROM rocker/r-ver:4.3.1
 
 WORKDIR /srv/shiny-server
 
-# 1) Installer les dépendances système
+# 1) Installer les dépendances système, y compris libsodium-dev
 RUN apt-get update && \
     apt-get install -y \
       libcurl4-openssl-dev \
@@ -14,6 +14,7 @@ RUN apt-get update && \
       libv8-dev \
       chromium-browser \
       libpoppler-cpp-dev \
+      libsodium-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # 2) Installer ET vérifier plumber + autres packages en une seule commande
@@ -32,4 +33,4 @@ RUN mkdir -p /srv/shiny-server/snapshots
 EXPOSE 8080
 
 # 5) Démarrer Plumber en écoutant sur le PORT Cloud Run
-CMD ["R", "-e", "pr <- plumber::plumb('/srv/shiny-server/server.R'); pr$run(host='0.0.0.0', port = as.integer(Sys.getenv('PORT', '8080')))"]
+CMD ["R", "-e", "pr <- plumber::plumb('/srv/shiny-server/server.R'); pr$run(host='0.0.0.0', port = as.integer(Sys.getenv('PORT','8080')))"]
