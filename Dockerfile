@@ -1,3 +1,5 @@
+# axiny-backend/Dockerfile
+
 FROM rocker/r-ver:4.3.1
 
 WORKDIR /srv/shiny-server
@@ -15,16 +17,16 @@ RUN apt-get update && \
     && rm -rf /var/lib/apt/lists/*
 
 # 2) Installer les packages R
-RUN R -e "install.packages(c('shiny','httpuv','ggplot2','rvest','pdftools'), repos='https://cloud.r-project.org')"
+RUN R -e "install.packages(c('shiny','httpuv','ggplot2','rvest','pdftools','plumber'), repos='https://cloud.r-project.org')"
 
-# 3) Copier votre code
-COPY user_app /srv/shiny-server/user_app
-COPY loader.R snapshot.R /srv/shiny-server/
+# 3) Copier les scripts R
+COPY snapshot.R /srv/shiny-server/snapshot.R
+COPY server.R   /srv/shiny-server/server.R
 
-# 4) Créer le dossier snapshots
+# 4) Créer le dossier snapshots (utilisé temporairement par snapshot.R)
 RUN mkdir -p /srv/shiny-server/snapshots
 
-EXPOSE 3838
+EXPOSE 8080
 
-# 5) Démarrer le conteneur (SYNTAXE CORRIGÉE)
-CMD ["/bin/sh", "-c", "R -e \"shiny::runApp('loader.R', host='0.0.0.0', port=3838, launch.browser = FALSE)\" & sleep 5 && Rscript snapshot.R"]
+# 5) Démarrer le serveur Plumber
+CMD ["R", "-e", "pr <- plumber::plumb('/srv/shiny-server/server.R'); pr$run(host='0.0.0.0', port=8080)"]
